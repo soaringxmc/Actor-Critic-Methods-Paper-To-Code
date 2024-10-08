@@ -4,7 +4,7 @@ from ddpg_torch import Agent
 from utils import plot_learning_curve
 
 if __name__ == '__main__':
-    env = gym.make('LunarLanderContinuous-v2')
+    env = gym.make('LunarLanderContinuous-v2', render_mode='human')
     agent = Agent(alpha=0.0001, beta=0.001, 
                     input_dims=env.observation_space.shape, tau=0.001,
                     batch_size=64, fc1_dims=400, fc2_dims=300, 
@@ -17,17 +17,18 @@ if __name__ == '__main__':
     best_score = env.reward_range[0]
     score_history = []
     for i in range(n_games):
-        observation = env.reset()
+        observation, _ = env.reset()
         done = False
         score = 0
         agent.noise.reset()
         while not done:
             action = agent.choose_action(observation)
-            observation_, reward, done, info = env.step(action)
+            observation_, reward, done, info, _ = env.step(action)
             agent.remember(observation, action, reward, observation_, done)
             agent.learn()
             score += reward
             observation = observation_
+            # env.render()
         score_history.append(score)
         avg_score = np.mean(score_history[-100:])
 
